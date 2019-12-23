@@ -1,21 +1,46 @@
 using System.Collections.Generic;
 using System.IO;
+using System;
 
 class Repo
 {
     public readonly Dictionary<Tag, HashSet<Item>> Dict = new Dictionary<Tag, HashSet<Item>>();
     public readonly HashSet<Item> All = new HashSet<Item>();
 
-    public void Deserialize(StreamReader sr)
+    public void Deserialize(BinaryReader br)
     {
+        try
+        {
+            Clear();
+            while (true)
+            {
+                var item = Item.Deserialize(br);
+                AddItem(item);
+            }
+        }
+        catch (EndOfStreamException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        catch (ObjectDisposedException)
+        {
+        }
     }
 
-    public void Serialize(StreamWriter sw)
+    public void Serialize(BinaryWriter bw)
     {
         foreach (var item in All)
         {
             //item.Serialize();
         }
+    }
+
+    public void Clear()
+    {
+        Dict.Clear();
+        All.Clear();
     }
 
     public void AddItem(Item item)

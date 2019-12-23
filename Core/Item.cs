@@ -6,23 +6,43 @@ abstract class Item
 {
     public abstract int TypeId { get; }
     public readonly HashSet<Tag> Tags = new HashSet<Tag>();
-    public abstract void SerializeBody(StreamWriter sw);
-    public abstract void DeserializeBody(StreamReader sr)
+    public abstract void SerializeBody(BinaryWriter sw);
+    public abstract void DeserializeBody(BinaryReader sr);
 
-    public void Serialize(StreamWriter sw)
+    public void Serialize(BinaryWriter bw)
     {
-        sw.Write(TypeId);
-        sw.Write(Tags.Count);
+        bw.Write(TypeId);
+        bw.Write(Tags.Count);
         foreach (var tag in Tags)
         {
-            sw.Write("${tag.Title.Trim();");
+            bw.Write("${tag.Title.Trim();");
         }
-        SerializeBody(sw);
+        SerializeBody(bw);
     }
 
-    public bool Deserialize(StreamReader sr)
+    public static Item Deserialize(BinaryReader br)
     {
-        sr.Read(TypeId);
+        var typeId = br.ReadInt32();
+        if (Types.TryGetValue(typeId, out var type))
+        {
+            var item = (Item)Activator.CreateInstance(type);
+            item.TypedDeserialize(br);
+            return item;
+        }
+        return null;
+    }
+
+    private void TypedDeserialize(BinaryReader br)
+    {
+        var typeId = br.ReadInt32();
+        var tagsCount = br.ReadInt32();
+        Tags.Clear();
+        for (var i = 0; i < tagsCount; i++)
+        {
+            var tag = br.ReadString();
+            Tags.Add(new Tag(tag));
+        }
+        DeserializeBody(br);
     }
 
     public static readonly Dictionary<int, Type> Types;
@@ -32,17 +52,4 @@ abstract class Item
         Types[typeId] = type;
     }
 
-    public static Item Deserialize(StreamReader sr)
-    {
-        foreach (var t in Types.Keys)
-        {
-            var newItem = Types[t];
-            if (newItem.TryDeserialize(sr))
-            {
-                Types[t] = (Item)Activator.CreateInstance(t);
-                return newItem;
-            }
-        }
-        return null;
-    }
 }
