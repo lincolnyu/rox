@@ -2,92 +2,95 @@ using System.Collections.Generic;
 using System.IO;
 using System;
 
-class Repo
+namespace Rox.Core
 {
-    public readonly Dictionary<Tag, HashSet<Item>> Dict = new Dictionary<Tag, HashSet<Item>>();
-    public readonly HashSet<Item> All = new HashSet<Item>();
-
-    public void Deserialize(BinaryReader br)
+    class Repo
     {
-        try
+        public readonly Dictionary<Tag, HashSet<Item>> Dict = new Dictionary<Tag, HashSet<Item>>();
+        public readonly HashSet<Item> All = new HashSet<Item>();
+
+        public void Deserialize(BinaryReader br)
         {
-            Clear();
-            while (true)
+            try
             {
-                var item = Item.Deserialize(br);
-                AddItem(item);
+                Clear();
+                while (true)
+                {
+                    var item = Item.Deserialize(br);
+                    AddItem(item);
+                }
+            }
+            catch (EndOfStreamException)
+            {
+            }
+            catch (IOException)
+            {
+            }
+            catch (ObjectDisposedException)
+            {
             }
         }
-        catch (EndOfStreamException)
-        {
-        }
-        catch (IOException)
-        {
-        }
-        catch (ObjectDisposedException)
-        {
-        }
-    }
 
-    public void Serialize(BinaryWriter bw)
-    {
-        foreach (var item in All)
+        public void Serialize(BinaryWriter bw)
         {
-            //item.Serialize();
-        }
-    }
-
-    public void Clear()
-    {
-        Dict.Clear();
-        All.Clear();
-    }
-
-    public void AddItem(Item item)
-    {
-        LinkItemTags(item, item.Tags);
-        All.Add(item);
-    }
-
-    public void RemoveItem(Item item)
-    {
-        All.Remove(item);
-        UnlinkItemTags(item, item.Tags);
-    }
-
-    public void LinkItemTags(Item item, ICollection<Tag> tags)
-    {
-        foreach (var tag in tags)
-        {
-            Link(tag, item);
-        }
-    }
-
-    public void UnlinkItemTags(Item item, ICollection<Tag> tags)
-    {
-        foreach (var tag in tags)
-        {
-            if (item.Tags.Contains(tag))
+            foreach (var item in All)
             {
-                Unlink(tag, item);
+                item.Serialize(bw);
             }
         }
-    }
 
-    private void Link(Tag tag, Item item)
-    {
-        item.Tags.Add(tag);
-        if (!Dict.TryGetValue(tag, out var val))
+        public void Clear()
         {
-            Dict[tag] = val = new HashSet<Item>();
+            Dict.Clear();
+            All.Clear();
         }
-        val.Add(item);
-    }
 
-    private void Unlink(Tag tag, Item item)
-    {
-        Dict[tag].Remove(item);
-        //Clear?
-        item.Tags.Remove(tag);
+        public void AddItem(Item item)
+        {
+            LinkItemTags(item, item.Tags);
+            All.Add(item);
+        }
+
+        public void RemoveItem(Item item)
+        {
+            All.Remove(item);
+            UnlinkItemTags(item, item.Tags);
+        }
+
+        public void LinkItemTags(Item item, ICollection<Tag> tags)
+        {
+            foreach (var tag in tags)
+            {
+                Link(tag, item);
+            }
+        }
+
+        public void UnlinkItemTags(Item item, ICollection<Tag> tags)
+        {
+            foreach (var tag in tags)
+            {
+                if (item.Tags.Contains(tag))
+                {
+                    Unlink(tag, item);
+                }
+            }
+        }
+
+        private void Link(Tag tag, Item item)
+        {
+            item.Tags.Add(tag);
+            if (!Dict.TryGetValue(tag, out var val))
+            {
+                Dict[tag] = val = new HashSet<Item>();
+            }
+            val.Add(item);
+        }
+
+        private void Unlink(Tag tag, Item item)
+        {
+            Dict[tag].Remove(item);
+            //Clear?
+            item.Tags.Remove(tag);
+        }
     }
 }

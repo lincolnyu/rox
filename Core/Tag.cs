@@ -1,30 +1,33 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-class Tag : IEquatable<Tag>
+namespace Rox.Core
 {
-    public string Title { get; }
-    public string TitleAsId { get; }
-    public Tag(string title)
+    class Tag : IEquatable<Tag>
     {
-        Title = title;
-        TitleAsId = title.ToLower();
-    }
-
-    public override int GetHashCode()
-    {
-        return TitleAsId.GetHashCode();
-    }
-
-    public override bool Equals(object obj)
-    {
-        if (obj is Tag tag)
+        public string Title { get; }
+        public string TitleAsId { get; }
+        public Tag(string title)
         {
-            return Equals(tag);
+            Title = title;
+            TitleAsId = title.ToLower();
         }
-        return false;
-    }
 
-    public bool Equals([AllowNull] Tag other)
-        => TitleAsId == other.TitleAsId;
+        public override int GetHashCode()
+        {
+            return TitleAsId.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Tag tag)
+            {
+                return Equals(tag);
+            }
+            return false;
+        }
+
+        public bool Equals([AllowNull] Tag other)
+            => TitleAsId == other.TitleAsId;
+    }
 }
