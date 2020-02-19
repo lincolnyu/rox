@@ -6,6 +6,26 @@ namespace Rox.Core
 {
     abstract class Item
     {
+        public interface ICreator
+        {
+            Item Create();
+            Item Buffered { get; }
+        }
+        class Creator<T> : ICreator where T : Item, new()
+        {
+            public Creator()
+            {
+                _buffered = new T();
+            }
+            public Item Create()
+            {
+                var t = _buffered;
+                _buffered = new T();
+                return t;
+            }
+            public Item Buffered => _buffered;
+            private T _buffered;
+        }
         public abstract int TypeId { get; }
         public readonly HashSet<Tag> Tags = new HashSet<Tag>();
         public abstract void SerializeBody(BinaryWriter bw);
@@ -25,9 +45,9 @@ namespace Rox.Core
         public static Item Deserialize(BinaryReader br)
         {
             var typeId = br.ReadInt32();
-            if (Types.TryGetValue(typeId, out var type))
+            if (Types.TryGetValue(typeId, out var creator))
             {
-                var item = (Item)Activator.CreateInstance(type);
+                var item = creator.Create();
                 item.TypedDeserialize(br);
                 return item;
             }
@@ -47,11 +67,12 @@ namespace Rox.Core
             DeserializeBody(br);
         }
 
-        public static readonly Dictionary<int, Type> Types = new Dictionary<int, Type>();
+        public static readonly Dictionary<int, ICreator> Types = new Dictionary<int, ICreator>();
         
-        public static void Register(int typeId, Type type)
+        public static void Register<T>() where T : Item, new()
         {
-            Types[typeId] = type;
+            var creator = new Creator<T>();
+            Types[creator.Buffered.TypeId] = creator;
         }
     }
 }
