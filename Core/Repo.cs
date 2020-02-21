@@ -57,7 +57,7 @@ namespace Rox.Core
             UnlinkItemTags(item, item.Tags);
         }
 
-        public void LinkItemTags(Item item, ICollection<Tag> tags)
+        public void LinkItemTags(Item item, IEnumerable<Tag> tags)
         {
             foreach (var tag in tags)
             {
@@ -65,7 +65,7 @@ namespace Rox.Core
             }
         }
 
-        public void UnlinkItemTags(Item item, ICollection<Tag> tags)
+        public void UnlinkItemTags(Item item, IEnumerable<Tag> tags)
         {
             foreach (var tag in tags)
             {

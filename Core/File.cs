@@ -15,5 +15,22 @@ namespace Rox.Core
         {
             bw.Write(Path);
         }
+        // override object.Equals
+        public override bool Equals(object obj)
+        {
+            if (obj == null || GetType() != obj.GetType())
+            {
+                return false;
+            }
+
+            // TODO path same
+            return Path == ((File)obj).Path;
+        }
+        
+        // override object.GetHashCode
+        public override int GetHashCode()
+        {
+            return Path.GetHashCode();
+        } 
     }
 }

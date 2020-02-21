@@ -27,27 +27,34 @@ namespace Rox.Core
             private T _buffered;
         }
         public abstract int TypeId { get; }
-        public readonly HashSet<Tag> Tags = new HashSet<Tag>();
+        public HashSet<Tag> Tags { get; private set;} = new HashSet<Tag>();
         public abstract void SerializeBody(BinaryWriter bw);
         public abstract void DeserializeBody(BinaryReader br);
 
         public void Serialize(BinaryWriter bw)
         {
-            bw.Write(TypeId);
             bw.Write(Tags.Count);
             foreach (var tag in Tags)
             {
                 bw.Write("${tag.Title.Trim()}");
             }
+            bw.Write(TypeId);
             SerializeBody(bw);
         }
 
         public static Item Deserialize(BinaryReader br)
         {
+            var tagCount = br.ReadInt32();
+            var tags = new HashSet<Tag>();
+            while (tags.Count < tagCount)
+            {
+                tags.Add(new Tag(br.ReadString()));
+            }
             var typeId = br.ReadInt32();
             if (Types.TryGetValue(typeId, out var creator))
             {
                 var item = creator.Create();
+                item.Tags = tags;
                 item.TypedDeserialize(br);
                 return item;
             }
