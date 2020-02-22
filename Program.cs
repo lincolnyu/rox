@@ -13,13 +13,16 @@ namespace rox
 
         static void Main(string[] args)
         {
+            Factory.RegisterAll();
             if (args.Contains("--help"))
             {
-                Console.WriteLine($"Usage: {System.AppDomain.CurrentDomain.FriendlyName} [<db file name>]");
+                Console.WriteLine("Usage:");
+                Console.WriteLine($" {System.AppDomain.CurrentDomain.FriendlyName} [<db file name>]     run the program");
+                Console.WriteLine($" {System.AppDomain.CurrentDomain.FriendlyName} [<db file name>] -D  delete the db file");
                 return;
             }
             string dbfn;
-            if (args.Length < 1)
+            if (args.Length < 1 || args[0] == "-D")
             {
                 Console.WriteLine("Db file not provided, using default.");
                 dbfn = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location), "default.db");
@@ -28,8 +31,33 @@ namespace rox
             {
                 dbfn = args[0];
             }
+            var dbExists = System.IO.File.Exists(dbfn);
+            if (args.Contains("-D"))
+            {
+                if (dbExists)
+                {
+                    Console.WriteLine($"Are you sure you want to delete the db file: '{dbfn}'? ('Yes' to confirm)");
+                    var rl = Console.ReadLine();
+                    if (rl == "Yes")
+                    {
+                        if (dbExists)
+                        {
+                            System.IO.File.Delete(dbfn);
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Deletion of the db file cancelled by user.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"The db file '{dbfn}' does not exist");
+                }
+                return;
+            }
             _repo = new Repo();
-            if (System.IO.File.Exists(dbfn))
+            if (dbExists)
             {
                 using (var fs = new FileStream(dbfn, FileMode.Open))
                 {

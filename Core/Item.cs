@@ -36,7 +36,7 @@ namespace Rox.Core
             bw.Write(Tags.Count);
             foreach (var tag in Tags)
             {
-                bw.Write("${tag.Title.Trim()}");
+                bw.Write($"{tag.Title.Trim()}");
             }
             bw.Write(TypeId);
             SerializeBody(bw);
@@ -55,23 +55,10 @@ namespace Rox.Core
             {
                 var item = creator.Create();
                 item.Tags = tags;
-                item.TypedDeserialize(br);
+                item.DeserializeBody(br);
                 return item;
             }
             return null;
-        }
-
-        private void TypedDeserialize(BinaryReader br)
-        {
-            var typeId = br.ReadInt32();
-            var tagsCount = br.ReadInt32();
-            Tags.Clear();
-            for (var i = 0; i < tagsCount; i++)
-            {
-                var tag = br.ReadString();
-                Tags.Add(new Tag(tag));
-            }
-            DeserializeBody(br);
         }
 
         public static readonly Dictionary<int, ICreator> Types = new Dictionary<int, ICreator>();
