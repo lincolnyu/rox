@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System;
+using System.Collections.Specialized;
 
 namespace Rox.Core
 {
@@ -8,6 +9,8 @@ namespace Rox.Core
     {
         public readonly Dictionary<Tag, HashSet<Item>> Dict = new Dictionary<Tag, HashSet<Item>>();
         public readonly HashSet<Item> All = new HashSet<Item>();
+
+        public event NotifyCollectionChangedEventHandler ItemCollectionChanged;
 
         public void Deserialize(BinaryReader br)
         {
@@ -43,18 +46,54 @@ namespace Rox.Core
         {
             Dict.Clear();
             All.Clear();
+            ItemCollectionChanged?.Invoke(this, 
+                new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
+        // Clean tags that have no items
+        public void CleanUpTags()
+        {
+            foreach (var e in Dict)
+            {
+                if (e.Value.Count == 0)
+                {
+                    Dict.Remove(e.Key);
+                }
+            }
+        }
+
+        public void ModifyItem(Item key, Action<Item> changeMethod)
+        {
+            if (All.TryGetValue(key, out var actual))
+            {
+                All.Remove(actual);
+                ItemCollectionChanged.Invoke(this,
+                    new NotifyCollectionChangedEventArgs(
+                        NotifyCollectionChangedAction.Remove, 
+                        actual));
+                changeMethod(actual);
+                All.Add(actual);
+                ItemCollectionChanged.Invoke(this,
+                    new NotifyCollectionChangedEventArgs(
+                        NotifyCollectionChangedAction.Add, 
+                        actual));
+            }
+        }
+        
         public void AddItem(Item item)
         {
             LinkItemTags(item, item.Tags);
             All.Add(item);
+            ItemCollectionChanged?.Invoke(this, 
+                new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, new[]{item}));
         }
 
-        public void RemoveItem(Item item)
+        public void RemoveItem(Item item, bool cleanupTags=false)
         {
             All.Remove(item);
-            UnlinkItemTags(item, item.Tags);
+            UnlinkItemTags(item, item.Tags, cleanupTags);
+            ItemCollectionChanged?.Invoke(this, 
+                new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new[]{item}));
         }
 
         public void LinkItemTags(Item item, IEnumerable<Tag> tags)
@@ -65,13 +104,13 @@ namespace Rox.Core
             }
         }
 
-        public void UnlinkItemTags(Item item, IEnumerable<Tag> tags)
+        public void UnlinkItemTags(Item item, IEnumerable<Tag> tags, bool cleanupTags)
         {
             foreach (var tag in tags)
             {
                 if (item.Tags.Contains(tag))
                 {
-                    Unlink(tag, item);
+                    Unlink(tag, item, cleanupTags);
                 }
             }
         }
@@ -86,9 +125,14 @@ namespace Rox.Core
             val.Add(item);
         }
 
-        private void Unlink(Tag tag, Item item)
+        private void Unlink(Tag tag, Item item, bool cleanupTag)
         {
-            Dict[tag].Remove(item);
+            var tagEntry = Dict[tag];
+            tagEntry.Remove(item);
+            if (cleanupTag && tagEntry.Count == 0)
+            {
+                Dict.Remove(tag);
+            }
             //Clear?
             item.Tags.Remove(tag);
         }

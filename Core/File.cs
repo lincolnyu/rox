@@ -5,7 +5,10 @@ namespace Rox.Core
     class File : Item
     {
         public override int TypeId => 1;
+
+        // Absolute path of the file
         public string Path {get; set;}
+        
         public override void DeserializeBody(BinaryReader br)
         {
             Path = br.ReadString();
