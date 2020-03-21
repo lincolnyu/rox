@@ -5,7 +5,7 @@ using System.Collections.Specialized;
 
 namespace Rox.Core
 {
-    class Repo
+    public class Repo
     {
         public readonly Dictionary<Tag, HashSet<Item>> Dict = new Dictionary<Tag, HashSet<Item>>();
         public readonly HashSet<Item> All = new HashSet<Item>();

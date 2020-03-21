@@ -4,7 +4,7 @@ using System.IO;
 
 namespace Rox.Core
 {
-    abstract class Item
+    public abstract class Item
     {
         public interface ICreator
         {

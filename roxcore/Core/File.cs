@@ -2,7 +2,7 @@ using System.IO;
 
 namespace Rox.Core
 {
-    class File : Item
+    public class File : Item
     {
         public override int TypeId => 1;
 

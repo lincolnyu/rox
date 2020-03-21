@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Rox.Core
 {
-    class Tag : IEquatable<Tag>
+    public class Tag : IEquatable<Tag>
     {
         public string Title { get; }
         public string TitleAsId { get; }
