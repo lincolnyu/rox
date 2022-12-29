@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 
 namespace Rox.Core
@@ -8,6 +9,9 @@ namespace Rox.Core
 
         // Absolute path of the file
         public string Path {get; set;}
+
+        // All other duplicates
+        public List<string> Duplicates { get; } = new List<string>();
         
         public override void DeserializeBody(BinaryReader br)
         {

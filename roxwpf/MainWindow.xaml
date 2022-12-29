@@ -6,7 +6,40 @@
         xmlns:local="clr-namespace:roxwpf"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
+    <Window.Resources>
+        <Style TargetType="TextBox">
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+         <Style TargetType="Button">
+            <Setter Property="Height" Value="25" />
+        </Style>
+    </Window.Resources>
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width=".5*"/>
+            <ColumnDefinition Width="4*"/>
+            <ColumnDefinition Width="4*"/>
+            <ColumnDefinition Width="1.5*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="25"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Grid.Column="0" TextAlignment="Right" VerticalAlignment="Center">.rox file:</TextBlock>
+        <TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" IsReadOnly="True" Name="RoxFile"/>
+        <Button Grid.Row="0" Grid.Column="3" Click="BrowseBtnClick" ToolTip="Browse the directories for the file.">Browse</Button>
+        <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Bottom">Files</TextBlock>
+        <TextBlock Grid.Row="1" Grid.Column="2" VerticalAlignment="Bottom">Tags</TextBlock>
+        <ListView Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"/>
+        <ListView Grid.Row="2" Grid.Column="2"/>
 
+        <StackPanel Grid.Row="2" Grid.RowSpan="2" Grid.Column="3" Orientation="Vertical">
+            <Button Click="ResetViewBtnClick">Reset View</Button>
+            <CheckBox Name="EditingModeChk" Checked="EditingCheckedChanged" Unchecked="EditingCheckedChanged">Editing</CheckBox>
+            <GroupBox Name="EditingGroup">
+                <Button Click="AddNewTagBtnClick">Add New Tag</Button>
+            </GroupBox>
+        </StackPanel>
     </Grid>
 </Window>

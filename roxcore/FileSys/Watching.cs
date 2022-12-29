@@ -63,7 +63,8 @@ namespace Rox.FileSys
                     UpdateWatcherPath(e.NewItems.OfType<Rox.Core.File>(), _watcher.Path);
                     break;
                 case NotifyCollectionChangedAction.Remove:
-                    // do nothing as it's hard to update
+                    // Do nothing as it's hard to update
+                    //TODO Optimize this...
                     break;
                 case NotifyCollectionChangedAction.Reset:
                     ResetWatcherPath();
